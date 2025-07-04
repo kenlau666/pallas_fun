@@ -1,0 +1,9 @@
+[package]
+name = "pallas_fun"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+hex = "0.4.3"
+pallas = "0.32.1"
+serde = "1.0.219"
