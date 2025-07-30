@@ -10,3 +10,5 @@ docs
 */**/.env
 
 publish
+
+.DS_Store
