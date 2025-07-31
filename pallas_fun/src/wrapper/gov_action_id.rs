@@ -13,31 +13,33 @@ pub struct GovActionIdWrapper {
 }
 
 impl GovActionIdWrapper {
-    pub fn new(transaction_id: &str, index: u32) -> Self {
+    pub fn new(transaction_id: &str, index: u32) -> Result<Self, String> {
         let digest: Hash<32> = transaction_id
             .parse()
-            .expect("Invalid transaction id length");
+            .map_err(|_| "Invalid transaction id length".to_string())?;
 
-        Self {
+        Ok(Self {
             pallas_gov_action_id: GovActionId {
                 transaction_id: digest,
                 action_index: index,
             },
-        }
+        })
     }
 
-    pub fn encode(self) -> String {
-        hex::encode(self.into_inner().encode_fragment().unwrap())
+    pub fn encode(&self) -> String {
+        hex::encode(&self.into_inner().encode_fragment().unwrap())
     }
 
-    pub fn decode(self, hex_string: String) -> Self {
-        Self {
-            pallas_gov_action_id: GovActionId::decode_fragment(&hex::decode(hex_string).unwrap())
-                .unwrap(),
-        }
+    pub fn decode(hex_string: String) -> Result<Self, String> {
+        let bytes = hex::decode(hex_string).map_err(|e| format!("Hex decode error: {}", e))?;
+        let gov_action_id = GovActionId::decode_fragment(&bytes)
+            .map_err(|e| format!("Fragment decode error: {}", e))?;
+        Ok(Self {
+            pallas_gov_action_id: gov_action_id,
+        })
     }
 
-    pub fn into_inner(self) -> GovActionId {
-        self.pallas_gov_action_id
+    pub fn into_inner(&self) -> GovActionId {
+        self.pallas_gov_action_id.clone()
     }
 }

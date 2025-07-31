@@ -24,17 +24,20 @@ impl ValueWrapper {
         }
     }
 
-    pub fn encode(self) -> String {
+    pub fn encode(&self) -> String {
         hex::encode(self.into_inner().encode_fragment().unwrap())
     }
 
-    pub fn decode(self, hex_string: String) -> Self {
-        Self {
-            pallas_value: Value::decode_fragment(&hex::decode(hex_string).unwrap()).unwrap(),
-        }
+    pub fn decode(hex_string: String) -> Result<Self, String> {
+        let bytes = hex::decode(hex_string).map_err(|e| format!("Hex decode error: {}", e))?;
+        let value =
+            Value::decode_fragment(&bytes).map_err(|e| format!("Fragment decode error: {}", e))?;
+        Ok(Self {
+            pallas_value: value,
+        })
     }
 
-    pub fn into_inner(self) -> Value {
-        self.pallas_value
+    pub fn into_inner(&self) -> Value {
+        self.pallas_value.clone()
     }
 }

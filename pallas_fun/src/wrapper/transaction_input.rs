@@ -24,33 +24,34 @@ pub struct TransactionInputWrapper {
 }
 
 impl TransactionInputWrapper {
-    pub fn new(transaction_id: &str, index: u64) -> Self {
+    pub fn new(transaction_id: &str, index: u64) -> Result<Self, String> {
         let digest: Hash<32> = transaction_id
             .parse()
-            .expect("Invalid transaction id length");
+            .map_err(|_| "Invalid transaction id length".to_string())?;
 
-        Self {
+        Ok(Self {
             pallas_transaction_input: TransactionInput {
                 transaction_id: digest,
                 index: index,
             },
-        }
+        })
     }
 
-    pub fn encode(self) -> String {
-        hex::encode(self.into_inner().encode_fragment().unwrap())
+    pub fn encode(&self) -> String {
+        hex::encode(&self.into_inner().encode_fragment().unwrap())
     }
 
-    pub fn decode(self, hex_string: String) -> Self {
-        Self {
-            pallas_transaction_input: TransactionInput::decode_fragment(
-                &hex::decode(hex_string).unwrap(),
-            )
-            .unwrap(),
-        }
+    pub fn decode(hex_string: String) -> Result<Self, String> {
+        let bytes = hex::decode(hex_string).map_err(|e| format!("Hex decode error: {}", e))?;
+        let tx_input = TransactionInput::decode_fragment(&bytes)
+            .map_err(|e| format!("Fragment decode error: {}", e))?;
+
+        Ok(Self {
+            pallas_transaction_input: tx_input,
+        })
     }
 
-    pub fn into_inner(self) -> TransactionInput {
-        self.pallas_transaction_input
+    pub fn into_inner(&self) -> TransactionInput {
+        self.pallas_transaction_input.clone()
     }
 }

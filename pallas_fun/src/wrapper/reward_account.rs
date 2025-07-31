@@ -26,27 +26,28 @@ pub struct RewardAccountWrapper {
 }
 
 impl RewardAccountWrapper {
-    pub fn new(reward_account: &str) -> Self {
-        Self {
-            pallas_reward_account: Bytes::from_str(reward_account)
-                .expect("Invalid reward account length"),
-        }
+    pub fn new(reward_account: &str) -> Result<Self, String> {
+        let bytes = Bytes::from_str(reward_account)
+            .map_err(|_| "Invalid reward account length".to_string())?;
+        Ok(Self {
+            pallas_reward_account: bytes,
+        })
     }
 
-    pub fn encode(self) -> String {
+    pub fn encode(&self) -> String {
         hex::encode(self.into_inner().encode_fragment().unwrap())
     }
 
-    pub fn decode(self, hex_string: String) -> Self {
-        Self {
-            pallas_reward_account: RewardAccount::decode_fragment(
-                &hex::decode(hex_string).unwrap(),
-            )
-            .unwrap(),
-        }
+    pub fn decode(hex_string: String) -> Result<Self, String> {
+        let bytes = hex::decode(hex_string).map_err(|e| format!("Hex decode error: {}", e))?;
+        let reward_account = RewardAccount::decode_fragment(&bytes)
+            .map_err(|e| format!("Fragment decode error: {}", e))?;
+        Ok(Self {
+            pallas_reward_account: reward_account,
+        })
     }
 
-    pub fn into_inner(self) -> RewardAccount {
-        self.pallas_reward_account
+    pub fn into_inner(&self) -> RewardAccount {
+        self.pallas_reward_account.clone()
     }
 }
