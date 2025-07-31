@@ -1,7 +1,9 @@
+mod gov_action_id;
 mod multiasset_non_zero_int;
 mod multiasset_positive_coin;
 mod required_signers;
 mod reward_account;
+mod transaction_body;
 mod transaction_input;
 mod value;
 mod voter;
