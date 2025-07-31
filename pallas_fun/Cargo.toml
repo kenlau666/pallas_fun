@@ -5,5 +5,5 @@ edition = "2024"
 
 [dependencies]
 hex = "0.4.3"
-pallas = "0.32.1"
+pallas = "0.33.0"
 serde = "1.0.219"
