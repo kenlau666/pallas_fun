@@ -1,11 +1,9 @@
-use std::str::FromStr;
-
-use pallas::codec::utils::Bytes;
-
 use hex;
 use pallas::codec::minicbor::{self, Decode, Encode};
+use pallas::codec::utils::Bytes;
 use pallas::ledger::primitives::{Fragment, RewardAccount};
 use serde::{Deserialize, Serialize};
+use std::str::FromStr;
 
 #[derive(
     Serialize,

@@ -1,7 +1,6 @@
-pub use pallas::crypto::hash::Hash;
-
 use hex;
 use pallas::codec::minicbor::{self, Decode, Encode};
+use pallas::crypto::hash::Hash;
 use pallas::ledger::primitives::Fragment;
 use pallas::ledger::primitives::conway::GovActionId;
 use serde::{Deserialize, Serialize};

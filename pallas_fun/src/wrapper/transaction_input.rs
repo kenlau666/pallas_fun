@@ -1,7 +1,6 @@
-pub use pallas::crypto::hash::Hash;
-
 use hex;
 use pallas::codec::minicbor::{self, Decode, Encode};
+pub use pallas::crypto::hash::Hash;
 use pallas::ledger::primitives::{Fragment, TransactionInput};
 use serde::{Deserialize, Serialize};
 

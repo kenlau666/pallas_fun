@@ -1,10 +1,11 @@
-use pallas::codec::utils::NonEmptySet;
-
 use hex;
 use pallas::codec::minicbor::{self, Decode, Encode};
+use pallas::codec::utils::NonEmptySet;
+use pallas::ledger::primitives::Fragment;
 use pallas::ledger::primitives::conway::RequiredSigners;
-use pallas::ledger::primitives::{AddrKeyhash, Fragment};
 use serde::{Deserialize, Serialize};
+
+use crate::utils::parse_address_key_hash;
 
 #[derive(Serialize, Deserialize, Encode, Decode, Debug, PartialEq, Eq, PartialOrd, Clone)]
 pub struct RequiredSignersWrapper {
@@ -13,16 +14,10 @@ pub struct RequiredSignersWrapper {
 }
 
 impl RequiredSignersWrapper {
-    fn parse_address_key_hash(address_key_hash_str: &str) -> Result<AddrKeyhash, String> {
-        address_key_hash_str
-            .parse()
-            .map_err(|_| "Invalid address key hash length".to_string())
-    }
-
     pub fn new(required_signers: Vec<&str>) -> Result<Self, String> {
         let mut pallas_require_signers_vec = Vec::new();
         for address_key_hash_str in required_signers {
-            let keyhash = Self::parse_address_key_hash(address_key_hash_str)?;
+            let keyhash = parse_address_key_hash(address_key_hash_str)?;
             pallas_require_signers_vec.push(keyhash);
         }
         let non_empty_set = NonEmptySet::from_vec(pallas_require_signers_vec)
