@@ -5,7 +5,7 @@ use pallas::ledger::primitives::Fragment;
 use pallas::ledger::primitives::conway::RequiredSigners;
 use serde::{Deserialize, Serialize};
 
-use crate::utils::parse_address_key_hash;
+use crate::utils::{IntoInner, parse_address_key_hash};
 
 #[derive(Serialize, Deserialize, Encode, Decode, Debug, PartialEq, Eq, PartialOrd, Clone)]
 pub struct RequiredSignersWrapper {
@@ -40,8 +40,10 @@ impl RequiredSignersWrapper {
             pallas_require_signers: required_signers,
         })
     }
+}
 
-    pub fn into_inner(&self) -> RequiredSigners {
+impl IntoInner<RequiredSigners> for RequiredSignersWrapper {
+    fn into_inner(&self) -> RequiredSigners {
         self.pallas_require_signers.clone()
     }
 }

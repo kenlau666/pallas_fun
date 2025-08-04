@@ -269,8 +269,10 @@ impl CertificateWrapper {
             pallas_certificate: certificate,
         })
     }
+}
 
-    pub fn into_inner(&self) -> Certificate {
+impl IntoInner<Certificate> for CertificateWrapper {
+    fn into_inner(&self) -> Certificate {
         self.pallas_certificate.clone()
     }
 }

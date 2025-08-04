@@ -5,6 +5,8 @@ use pallas::ledger::primitives::{AssetName, Fragment, PolicyId, conway::Multiass
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 
+use crate::utils::IntoInner;
+
 #[derive(
     Serialize,
     Deserialize,
@@ -82,8 +84,10 @@ impl MultiassetNonZeroIntWrapper {
             pallas_multiasset: multiasset,
         })
     }
+}
 
-    pub fn into_inner(&self) -> Multiasset<NonZeroInt> {
+impl IntoInner<Multiasset<NonZeroInt>> for MultiassetNonZeroIntWrapper {
+    fn into_inner(&self) -> Multiasset<NonZeroInt> {
         self.pallas_multiasset.clone()
     }
 }

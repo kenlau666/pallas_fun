@@ -5,6 +5,8 @@ use pallas::ledger::primitives::{Fragment, RewardAccount};
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 
+use crate::utils::IntoInner;
+
 #[derive(
     Serialize,
     Deserialize,
@@ -44,8 +46,10 @@ impl RewardAccountWrapper {
             pallas_reward_account: reward_account,
         })
     }
+}
 
-    pub fn into_inner(&self) -> RewardAccount {
+impl IntoInner<RewardAccount> for RewardAccountWrapper {
+    fn into_inner(&self) -> RewardAccount {
         self.pallas_reward_account.clone()
     }
 }

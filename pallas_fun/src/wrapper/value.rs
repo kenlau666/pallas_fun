@@ -4,6 +4,7 @@ use pallas::ledger::primitives::Fragment;
 use pallas::ledger::primitives::conway::Value;
 use serde::{Deserialize, Serialize};
 
+use crate::utils::IntoInner;
 use crate::wrapper::MultiassetPositiveCoinWrapper;
 
 #[derive(Serialize, Deserialize, Encode, Decode, Debug, PartialEq, Eq, Clone)]
@@ -36,8 +37,10 @@ impl ValueWrapper {
             pallas_value: value,
         })
     }
+}
 
-    pub fn into_inner(&self) -> Value {
+impl IntoInner<Value> for ValueWrapper {
+    fn into_inner(&self) -> Value {
         self.pallas_value.clone()
     }
 }

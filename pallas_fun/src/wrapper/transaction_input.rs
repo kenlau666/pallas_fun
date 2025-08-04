@@ -4,6 +4,8 @@ pub use pallas::crypto::hash::Hash;
 use pallas::ledger::primitives::{Fragment, TransactionInput};
 use serde::{Deserialize, Serialize};
 
+use crate::utils::IntoInner;
+
 #[derive(
     Serialize,
     Deserialize,
@@ -49,8 +51,10 @@ impl TransactionInputWrapper {
             pallas_transaction_input: tx_input,
         })
     }
+}
 
-    pub fn into_inner(&self) -> TransactionInput {
+impl IntoInner<TransactionInput> for TransactionInputWrapper {
+    fn into_inner(&self) -> TransactionInput {
         self.pallas_transaction_input.clone()
     }
 }

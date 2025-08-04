@@ -6,6 +6,8 @@ use pallas::ledger::primitives::{AssetName, Fragment, PolicyId};
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 
+use crate::utils::IntoInner;
+
 #[derive(
     Serialize,
     Deserialize,
@@ -83,8 +85,10 @@ impl MultiassetPositiveCoinWrapper {
             pallas_multiasset: multiasset,
         })
     }
+}
 
-    pub fn into_inner(&self) -> Multiasset<PositiveCoin> {
+impl IntoInner<Multiasset<PositiveCoin>> for MultiassetPositiveCoinWrapper {
+    fn into_inner(&self) -> Multiasset<PositiveCoin> {
         self.pallas_multiasset.clone()
     }
 }

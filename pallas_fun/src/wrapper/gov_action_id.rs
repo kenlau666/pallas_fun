@@ -5,6 +5,8 @@ use pallas::ledger::primitives::Fragment;
 use pallas::ledger::primitives::conway::GovActionId;
 use serde::{Deserialize, Serialize};
 
+use crate::utils::IntoInner;
+
 #[derive(Encode, Decode, Serialize, Deserialize, Debug, PartialEq, Eq, Clone)] // #[derive(PartialOrd, Ord] somehow missing
 pub struct GovActionIdWrapper {
     #[n(0)]
@@ -37,8 +39,10 @@ impl GovActionIdWrapper {
             pallas_gov_action_id: gov_action_id,
         })
     }
+}
 
-    pub fn into_inner(&self) -> GovActionId {
+impl IntoInner<GovActionId> for GovActionIdWrapper {
+    fn into_inner(&self) -> GovActionId {
         self.pallas_gov_action_id.clone()
     }
 }
