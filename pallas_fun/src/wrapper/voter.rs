@@ -1,16 +1,18 @@
 use hex;
 use pallas::codec::minicbor::{self, Decode, Encode};
+use pallas::ledger::primitives::Fragment;
 use pallas::ledger::primitives::conway::Voter;
-use pallas::ledger::primitives::{AddrKeyhash, Fragment, ScriptHash};
 use serde::{Deserialize, Serialize};
+
+use crate::utils::{IntoInner, parse_address_key_hash, parse_script_hash};
 
 #[derive(Clone, PartialEq, Eq, Hash, Debug)]
 pub enum VoterKind {
-    ConstitutionalCommitteeKey(String),
-    ConstitutionalCommitteeScript(String),
-    DRepKey(String),
-    DRepScript(String),
-    StakePoolKey(String),
+    ConstitutionalCommitteeScript { script_hash: String },
+    ConstitutionalCommitteeKey { script_hash: String },
+    DRepScript { script_hash: String },
+    DRepKey { addr_key_hash: String },
+    StakePoolKey { addr_key_hash: String },
 }
 
 #[derive(Serialize, Deserialize, Encode, Decode, Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
@@ -20,36 +22,26 @@ pub struct VoterWrapper {
 }
 
 impl VoterWrapper {
-    fn parse_address_key_hash(address_key_hash_str: &str) -> Result<AddrKeyhash, String> {
-        address_key_hash_str
-            .parse()
-            .map_err(|_| "Invalid address key hash length".to_string())
-    }
-
-    fn parse_script_hash(script_hash_str: &str) -> Result<ScriptHash, String> {
-        script_hash_str
-            .parse()
-            .map_err(|_| "Invalid script hash length".to_string())
-    }
-
     pub fn new(voter: VoterKind) -> Result<Self, String> {
         let pallas_voter = match voter {
-            VoterKind::ConstitutionalCommitteeKey(keyhash) => {
-                Voter::ConstitutionalCommitteeKey(Self::parse_address_key_hash(&keyhash)?)
+            VoterKind::ConstitutionalCommitteeKey { script_hash } => {
+                Voter::ConstitutionalCommitteeKey(parse_script_hash(&script_hash)?)
             }
-            VoterKind::ConstitutionalCommitteeScript(script_hash) => {
-                Voter::ConstitutionalCommitteeScript(Self::parse_script_hash(&script_hash)?)
+            VoterKind::ConstitutionalCommitteeScript { script_hash } => {
+                Voter::ConstitutionalCommitteeScript(parse_script_hash(&script_hash)?)
             }
-            VoterKind::DRepKey(keyhash) => Voter::DRepKey(Self::parse_address_key_hash(&keyhash)?),
-            VoterKind::DRepScript(script_hash) => {
-                Voter::DRepScript(Self::parse_script_hash(&script_hash)?)
+            VoterKind::DRepKey { addr_key_hash } => {
+                Voter::DRepKey(parse_address_key_hash(&addr_key_hash)?)
             }
-            VoterKind::StakePoolKey(keyhash) => {
-                Voter::StakePoolKey(Self::parse_address_key_hash(&keyhash)?)
+            VoterKind::DRepScript { script_hash } => {
+                Voter::DRepScript(parse_script_hash(&script_hash)?)
+            }
+            VoterKind::StakePoolKey { addr_key_hash } => {
+                Voter::StakePoolKey(parse_address_key_hash(&addr_key_hash)?)
             }
         };
 
-        Ok(VoterWrapper { pallas_voter })
+        Ok(Self { pallas_voter })
     }
 
     pub fn encode(&self) -> String {
@@ -64,8 +56,10 @@ impl VoterWrapper {
             pallas_voter: voter,
         })
     }
+}
 
-    pub fn into_inner(&self) -> Voter {
+impl IntoInner<Voter> for VoterWrapper {
+    fn into_inner(&self) -> Voter {
         self.pallas_voter.clone()
     }
 }
