@@ -6,15 +6,15 @@ use pallas::ledger::primitives::conway::DRep;
 use serde::{Deserialize, Serialize};
 
 pub enum DRepKind {
-    Key { addr_key_hash: String },  // address key hash
-    Script { script_hash: String }, // script hash
+    Key { addr_key_hash: String },
+    Script { script_hash: String },
     Abstain,
     NoConfidence,
 }
 #[derive(Serialize, Deserialize, Encode, Decode, Debug, PartialEq, Eq, Clone)]
 pub struct DRepWrapper {
     #[n(0)]
-    pub pallas_drep: DRep,
+    inner: DRep,
 }
 
 impl DRepWrapper {
@@ -26,7 +26,7 @@ impl DRepWrapper {
             DRepKind::NoConfidence => DRep::NoConfidence,
         };
 
-        Ok(Self { pallas_drep })
+        Ok(Self { inner: pallas_drep })
     }
 
     pub fn encode(&self) -> String {
@@ -37,12 +37,12 @@ impl DRepWrapper {
         let bytes = hex::decode(hex_string).map_err(|e| format!("Hex decode error: {}", e))?;
         let pallas_drep =
             DRep::decode_fragment(&bytes).map_err(|e| format!("Fragment decode error: {}", e))?;
-        Ok(Self { pallas_drep })
+        Ok(Self { inner: pallas_drep })
     }
 }
 
 impl IntoInner<DRep> for DRepWrapper {
     fn into_inner(&self) -> DRep {
-        self.pallas_drep.clone()
+        self.inner.clone()
     }
 }

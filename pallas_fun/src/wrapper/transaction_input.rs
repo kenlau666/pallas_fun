@@ -21,7 +21,7 @@ use crate::utils::IntoInner;
 )]
 pub struct TransactionInputWrapper {
     #[n(0)]
-    pub pallas_transaction_input: TransactionInput,
+    pub inner: TransactionInput,
 }
 
 impl TransactionInputWrapper {
@@ -31,7 +31,7 @@ impl TransactionInputWrapper {
             .map_err(|_| "Invalid transaction id length".to_string())?;
 
         Ok(Self {
-            pallas_transaction_input: TransactionInput {
+            inner: TransactionInput {
                 transaction_id: digest,
                 index: index,
             },
@@ -47,14 +47,12 @@ impl TransactionInputWrapper {
         let tx_input = TransactionInput::decode_fragment(&bytes)
             .map_err(|e| format!("Fragment decode error: {}", e))?;
 
-        Ok(Self {
-            pallas_transaction_input: tx_input,
-        })
+        Ok(Self { inner: tx_input })
     }
 }
 
 impl IntoInner<TransactionInput> for TransactionInputWrapper {
     fn into_inner(&self) -> TransactionInput {
-        self.pallas_transaction_input.clone()
+        self.inner.clone()
     }
 }

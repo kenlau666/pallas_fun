@@ -10,7 +10,7 @@ use crate::utils::IntoInner;
 #[derive(Encode, Decode, Serialize, Deserialize, Debug, PartialEq, Eq, Clone)] // #[derive(PartialOrd, Ord] somehow missing
 pub struct GovActionIdWrapper {
     #[n(0)]
-    pub pallas_gov_action_id: GovActionId,
+    inner: GovActionId,
 }
 
 impl GovActionIdWrapper {
@@ -20,7 +20,7 @@ impl GovActionIdWrapper {
             .map_err(|_| "Invalid transaction id length".to_string())?;
 
         Ok(Self {
-            pallas_gov_action_id: GovActionId {
+            inner: GovActionId {
                 transaction_id: digest,
                 action_index: index,
             },
@@ -36,13 +36,13 @@ impl GovActionIdWrapper {
         let gov_action_id = GovActionId::decode_fragment(&bytes)
             .map_err(|e| format!("Fragment decode error: {}", e))?;
         Ok(Self {
-            pallas_gov_action_id: gov_action_id,
+            inner: gov_action_id,
         })
     }
 }
 
 impl IntoInner<GovActionId> for GovActionIdWrapper {
     fn into_inner(&self) -> GovActionId {
-        self.pallas_gov_action_id.clone()
+        self.inner.clone()
     }
 }

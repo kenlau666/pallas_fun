@@ -23,7 +23,7 @@ use crate::utils::IntoInner;
 )]
 pub struct MultiassetPositiveCoinWrapper {
     #[n(0)]
-    pub pallas_multiasset: Multiasset<PositiveCoin>,
+     inner: Multiasset<PositiveCoin>,
 }
 
 impl MultiassetPositiveCoinWrapper {
@@ -70,7 +70,9 @@ impl MultiassetPositiveCoinWrapper {
 
     pub fn new(multiasset: Vec<(String, Vec<(String, u64)>)>) -> Result<Self, String> {
         let pallas_multiasset = Self::convert_to_pallas_multiasset(multiasset)?;
-        Ok(Self { pallas_multiasset })
+        Ok(Self {
+            inner: pallas_multiasset,
+        })
     }
 
     pub fn encode(&self) -> String {
@@ -81,14 +83,12 @@ impl MultiassetPositiveCoinWrapper {
         let bytes = hex::decode(hex_string).map_err(|e| format!("Hex decode error: {}", e))?;
         let multiasset = NonEmptyKeyValuePairs::decode_fragment(&bytes)
             .map_err(|e| format!("Fragment decode error: {}", e))?;
-        Ok(Self {
-            pallas_multiasset: multiasset,
-        })
+        Ok(Self { inner: multiasset })
     }
 }
 
 impl IntoInner<Multiasset<PositiveCoin>> for MultiassetPositiveCoinWrapper {
     fn into_inner(&self) -> Multiasset<PositiveCoin> {
-        self.pallas_multiasset.clone()
+        self.inner.clone()
     }
 }

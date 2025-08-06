@@ -10,17 +10,17 @@ use crate::wrapper::MultiassetPositiveCoinWrapper;
 #[derive(Serialize, Deserialize, Encode, Decode, Debug, PartialEq, Eq, Clone)]
 pub struct ValueWrapper {
     #[n(0)]
-    pub pallas_value: Value,
+    pub inner: Value,
 }
 
 impl ValueWrapper {
     pub fn new(coin: u64, multiasset_wrapper: Option<MultiassetPositiveCoinWrapper>) -> Self {
         match multiasset_wrapper {
             Some(multiasset_wrapper) => Self {
-                pallas_value: Value::Multiasset(coin, multiasset_wrapper.into_inner()),
+                inner: Value::Multiasset(coin, multiasset_wrapper.into_inner()),
             },
             None => Self {
-                pallas_value: Value::Coin(coin),
+                inner: Value::Coin(coin),
             },
         }
     }
@@ -33,14 +33,12 @@ impl ValueWrapper {
         let bytes = hex::decode(hex_string).map_err(|e| format!("Hex decode error: {}", e))?;
         let value =
             Value::decode_fragment(&bytes).map_err(|e| format!("Fragment decode error: {}", e))?;
-        Ok(Self {
-            pallas_value: value,
-        })
+        Ok(Self { inner: value })
     }
 }
 
 impl IntoInner<Value> for ValueWrapper {
     fn into_inner(&self) -> Value {
-        self.pallas_value.clone()
+        self.inner.clone()
     }
 }

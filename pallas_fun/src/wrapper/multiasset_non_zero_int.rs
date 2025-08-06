@@ -22,7 +22,7 @@ use crate::utils::IntoInner;
 )]
 pub struct MultiassetNonZeroIntWrapper {
     #[n(0)]
-    pub pallas_multiasset: Multiasset<NonZeroInt>,
+    inner: Multiasset<NonZeroInt>,
 }
 
 impl MultiassetNonZeroIntWrapper {
@@ -69,7 +69,9 @@ impl MultiassetNonZeroIntWrapper {
 
     pub fn new(multiasset: Vec<(String, Vec<(String, i64)>)>) -> Result<Self, String> {
         let pallas_multiasset = Self::convert_to_pallas_multiasset(multiasset)?;
-        Ok(Self { pallas_multiasset })
+        Ok(Self {
+            inner: pallas_multiasset,
+        })
     }
 
     pub fn encode(&self) -> String {
@@ -80,14 +82,12 @@ impl MultiassetNonZeroIntWrapper {
         let bytes = hex::decode(hex_string).map_err(|e| format!("Hex decode error: {}", e))?;
         let multiasset = NonEmptyKeyValuePairs::decode_fragment(&bytes)
             .map_err(|e| format!("Fragment decode error: {}", e))?;
-        Ok(Self {
-            pallas_multiasset: multiasset,
-        })
+        Ok(Self { inner: multiasset })
     }
 }
 
 impl IntoInner<Multiasset<NonZeroInt>> for MultiassetNonZeroIntWrapper {
     fn into_inner(&self) -> Multiasset<NonZeroInt> {
-        self.pallas_multiasset.clone()
+        self.inner.clone()
     }
 }

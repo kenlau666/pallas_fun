@@ -18,12 +18,12 @@ pub enum VoterKind {
 #[derive(Serialize, Deserialize, Encode, Decode, Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
 pub struct VoterWrapper {
     #[n(0)]
-    pub pallas_voter: Voter,
+    pub inner: Voter,
 }
 
 impl VoterWrapper {
     pub fn new(voter: VoterKind) -> Result<Self, String> {
-        let pallas_voter = match voter {
+        let inner = match voter {
             VoterKind::ConstitutionalCommitteeKey { script_hash } => {
                 Voter::ConstitutionalCommitteeKey(parse_script_hash(&script_hash)?)
             }
@@ -41,7 +41,7 @@ impl VoterWrapper {
             }
         };
 
-        Ok(Self { pallas_voter })
+        Ok(Self { inner })
     }
 
     pub fn encode(&self) -> String {
@@ -52,14 +52,12 @@ impl VoterWrapper {
         let bytes = hex::decode(hex_string).map_err(|e| format!("Hex decode error: {}", e))?;
         let voter =
             Voter::decode_fragment(&bytes).map_err(|e| format!("Fragment decode error: {}", e))?;
-        Ok(Self {
-            pallas_voter: voter,
-        })
+        Ok(Self { inner: voter })
     }
 }
 
 impl IntoInner<Voter> for VoterWrapper {
     fn into_inner(&self) -> Voter {
-        self.pallas_voter.clone()
+        self.inner.clone()
     }
 }
