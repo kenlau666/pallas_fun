@@ -10,7 +10,7 @@ use crate::wrapper::MultiassetPositiveCoinWrapper;
 #[derive(Serialize, Deserialize, Encode, Decode, Debug, PartialEq, Eq, Clone)]
 pub struct ValueWrapper {
     #[n(0)]
-    pub inner: Value,
+    inner: Value,
 }
 
 impl ValueWrapper {

@@ -5,9 +5,8 @@ use pallas::ledger::primitives::Fragment;
 use pallas::ledger::primitives::conway::Certificate;
 use serde::{Deserialize, Serialize};
 
-use crate::credential::StakeCredentialWrapper;
 use crate::utils::{
-    IntoInner, parse_pool_key_hash, parse_unit_interval, parse_vec_string_to_set_addr_keyhash,
+    IntoInner, parse_pool_key_hash, parse_rational_number, parse_vec_string_to_set_addr_keyhash,
     parse_vrf_key_hash,
 };
 use crate::wrapper::anchor::AnchorWrapper;
@@ -15,6 +14,7 @@ use crate::wrapper::d_rep::DRepWrapper;
 use crate::wrapper::pool_metadata::PoolMetadataWrapper;
 use crate::wrapper::relay::RelayWrapper;
 use crate::wrapper::reward_account::RewardAccountWrapper;
+use crate::wrapper::stake_credential::StakeCredentialWrapper;
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone)]
 pub enum CertificateKind {
@@ -106,7 +106,7 @@ pub enum CertificateKind {
 #[derive(Serialize, Deserialize, Encode, Decode, Debug, PartialEq, Eq, Clone)] // removed partialOrd and ord
 pub struct CertificateWrapper {
     #[n(0)]
-    pub pallas_certificate: Certificate,
+    inner: Certificate,
 }
 
 impl CertificateWrapper {
@@ -145,7 +145,7 @@ impl CertificateWrapper {
                 vrf_keyhash: parse_vrf_key_hash(&vrf_keyhash)?,
                 pledge,
                 cost,
-                margin: parse_unit_interval(margin_nominator, margin_denominator)?,
+                margin: parse_rational_number(margin_nominator, margin_denominator)?,
                 reward_account: reward_account_wrapper.into_inner(),
                 pool_owners: parse_vec_string_to_set_addr_keyhash(pool_owners)?,
                 relays: relay_wrappers.into_iter().map(|r| r.into_inner()).collect(),
@@ -254,7 +254,9 @@ impl CertificateWrapper {
                 Nullable::from(anchor_wrapper.map(|a| a.into_inner())),
             ),
         };
-        Ok(Self { pallas_certificate })
+        Ok(Self {
+            inner: pallas_certificate,
+        })
     }
 
     pub fn encode(&self) -> String {
@@ -265,14 +267,64 @@ impl CertificateWrapper {
         let bytes = hex::decode(hex_string).map_err(|e| format!("Hex decode error: {}", e))?;
         let certificate = Certificate::decode_fragment(&bytes)
             .map_err(|e| format!("Fragment decode error: {}", e))?;
-        Ok(Self {
-            pallas_certificate: certificate,
-        })
+        Ok(Self { inner: certificate })
     }
 }
 
 impl IntoInner<Certificate> for CertificateWrapper {
     fn into_inner(&self) -> Certificate {
-        self.pallas_certificate.clone()
+        self.inner.clone()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+
+    use crate::wrapper::stake_credential::StakeCredentialKind;
+
+    use super::*;
+
+    #[test]
+    fn test_certificate_wrapper_encode_decode() {
+        // Example: StakeRegistration certificate
+        let stake_credential = StakeCredentialWrapper::new(StakeCredentialKind::AddrKeyhash(
+            "276fd18711931e2c0e21430192dbeac0e458093cd9d1fcd7210f64b3".to_string(),
+        ))
+        .expect("valid stake credential");
+
+        let cert_kind = CertificateKind::StakeRegistration {
+            stake_credential_wrapper: stake_credential,
+        };
+
+        let wrapper =
+            CertificateWrapper::new(cert_kind).expect("should create certificate wrapper");
+
+        let encoded = wrapper.encode();
+        let decoded = CertificateWrapper::decode(encoded).expect("should decode");
+
+        assert_eq!(wrapper, decoded);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_certificate_wrapper_invalid_keyhash() {
+        // Example: StakeRegistration with invalid keyhash
+        let stake_credential =
+            StakeCredentialWrapper::new(StakeCredentialKind::AddrKeyhash("invalid".to_string()));
+
+        assert!(
+            stake_credential.is_err(),
+            "should fail with invalid keyhash"
+        );
+
+        let cert_kind = CertificateKind::StakeRegistration {
+            stake_credential_wrapper: stake_credential.unwrap(),
+        };
+
+        let wrapper = CertificateWrapper::new(cert_kind);
+        assert!(
+            wrapper.is_err(),
+            "should fail to create certificate wrapper with invalid keyhash"
+        );
     }
 }

@@ -22,16 +22,14 @@ use crate::utils::IntoInner;
 )]
 pub struct RewardAccountWrapper {
     #[n(0)]
-    pub pallas_reward_account: RewardAccount,
+     inner: RewardAccount,
 }
 
 impl RewardAccountWrapper {
     pub fn new(reward_account: &str) -> Result<Self, String> {
         let bytes = Bytes::from_str(reward_account)
             .map_err(|_| "Invalid reward account length".to_string())?;
-        Ok(Self {
-            pallas_reward_account: bytes,
-        })
+        Ok(Self { inner: bytes })
     }
 
     pub fn encode(&self) -> String {
@@ -43,13 +41,13 @@ impl RewardAccountWrapper {
         let reward_account = RewardAccount::decode_fragment(&bytes)
             .map_err(|e| format!("Fragment decode error: {}", e))?;
         Ok(Self {
-            pallas_reward_account: reward_account,
+            inner: reward_account,
         })
     }
 }
 
 impl IntoInner<RewardAccount> for RewardAccountWrapper {
     fn into_inner(&self) -> RewardAccount {
-        self.pallas_reward_account.clone()
+        self.inner.clone()
     }
 }

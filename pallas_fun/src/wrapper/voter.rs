@@ -18,7 +18,7 @@ pub enum VoterKind {
 #[derive(Serialize, Deserialize, Encode, Decode, Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
 pub struct VoterWrapper {
     #[n(0)]
-    pub inner: Voter,
+    inner: Voter,
 }
 
 impl VoterWrapper {

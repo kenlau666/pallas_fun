@@ -10,7 +10,7 @@ use crate::utils::{IntoInner, parse_address_key_hash};
 #[derive(Serialize, Deserialize, Encode, Decode, Debug, PartialEq, Eq, PartialOrd, Clone)]
 pub struct RequiredSignersWrapper {
     #[n(0)]
-    pub pallas_require_signers: RequiredSigners,
+    inner: RequiredSigners,
 }
 
 impl RequiredSignersWrapper {
@@ -24,7 +24,7 @@ impl RequiredSignersWrapper {
             .ok_or_else(|| "invalid require signers".to_string())?;
 
         Ok(Self {
-            pallas_require_signers: non_empty_set,
+            inner: non_empty_set,
         })
     }
 
@@ -37,13 +37,13 @@ impl RequiredSignersWrapper {
         let required_signers = RequiredSigners::decode_fragment(&bytes)
             .map_err(|e| format!("Fragment decode error: {}", e))?;
         Ok(Self {
-            pallas_require_signers: required_signers,
+            inner: required_signers,
         })
     }
 }
 
 impl IntoInner<RequiredSigners> for RequiredSignersWrapper {
     fn into_inner(&self) -> RequiredSigners {
-        self.pallas_require_signers.clone()
+        self.inner.clone()
     }
 }
